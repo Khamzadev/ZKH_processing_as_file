@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZKH_FP_MC</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>Message class for file processing</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>Test mode : File would be deleted :</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>File deleted :</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Error deleting file :</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>Error getting file attributes for :</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>Error receiving the file :</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>File uploaded successfully.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>Error occurred during file upload.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>Error selecting file.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>008</MSGNR>
+     <TEXT>Error :</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>009</MSGNR>
+     <TEXT>Error saving file :</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZKH_FP_MC</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>File saved with : &amp;1 lines</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>
