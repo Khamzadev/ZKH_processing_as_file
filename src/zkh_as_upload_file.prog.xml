@@ -17,15 +17,15 @@
      <LENGTH>72</LENGTH>
     </item>
     <item>
-     <ID>I</ID>
-     <KEY>002</KEY>
-     <ENTRY>Error :</ENTRY>
-     <LENGTH>17</LENGTH>
-    </item>
-    <item>
      <ID>R</ID>
      <ENTRY>Program ZKH_AS_UPLOAD_FILE</ENTRY>
      <LENGTH>26</LENGTH>
+    </item>
+    <item>
+     <ID>S</ID>
+     <KEY>P_LNAME</KEY>
+     <ENTRY>File Logical Name</ENTRY>
+     <LENGTH>25</LENGTH>
     </item>
     <item>
      <ID>S</ID>
@@ -36,7 +36,7 @@
     <item>
      <ID>S</ID>
      <KEY>P_TARGET</KEY>
-     <ENTRY>The place of preservation</ENTRY>
+     <ENTRY>Target folder</ENTRY>
      <LENGTH>33</LENGTH>
     </item>
    </TPOOL>

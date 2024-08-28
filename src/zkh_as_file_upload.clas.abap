@@ -1,49 +1,70 @@
-CLASS zkh_as_file_upload DEFINITION PUBLIC FINAL CREATE PUBLIC.
+CLASS zkh_as_file_upload DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC.
+
   PUBLIC SECTION.
     INTERFACES: zkh_file_upload_i.
 
-    METHODS: upload_file
-      IMPORTING
-        iv_source TYPE string
-        iv_target TYPE string,
+
+    METHODS:
+      upload_file
+        IMPORTING
+          iv_source TYPE string
+          iv_target TYPE string,
+
       select_file
         CHANGING
-          cv_file_path TYPE localfile.
+          cv_file_path TYPE localfile,
 
-    METHODS: get_file_name
-      IMPORTING
-        iv_file_path        TYPE string
-      RETURNING
-        VALUE(rv_file_name) TYPE string,
+      set_logical_file_name
+        IMPORTING
+          iv_lname TYPE string
+        RETURNING
+          VALUE(rv_target_path) TYPE string,
+
+      get_file_name
+        IMPORTING
+          iv_file_path TYPE string
+        RETURNING
+          VALUE(rv_file_name) TYPE string,
+
       check_file_exists
         IMPORTING
-          iv_file_path     TYPE string
+          iv_file_path TYPE string
         RETURNING
           VALUE(rv_exists) TYPE abap_bool,
+
       save_file
         IMPORTING
-          iv_file_path     TYPE string
-          iv_target_path   TYPE string
+          iv_file_path TYPE string
+          iv_target_path TYPE string
         RETURNING
           VALUE(rv_result) TYPE abap_bool,
+
       get_subrc
         RETURNING
           VALUE(rv_subrc) TYPE sy-subrc,
+
+
+
+
       constructor.
 
   PROTECTED SECTION.
-  PRIVATE SECTION.
-    ALIASES create_log
-      FOR zkh_file_upload_i~create_log.
-    ALIASES display_log
-      FOR zkh_file_upload_i~display_log.
-    ALIASES log_exc
-      FOR zkh_file_upload_i~log_exc.
-    ALIASES log_msg
-      FOR zkh_file_upload_i~log_msg.
 
-    DATA mv_log_handle TYPE balloghndl.
-    DATA gv_subrc TYPE sy-subrc.
+  PRIVATE SECTION.
+
+    ALIASES:
+      create_log FOR zkh_file_upload_i~create_log,
+      display_log FOR zkh_file_upload_i~display_log,
+      log_exc FOR zkh_file_upload_i~log_exc,
+      log_msg FOR zkh_file_upload_i~log_msg.
+
+    " Переменные класса
+    DATA:
+      mv_log_handle TYPE balloghndl,
+      gv_subrc TYPE sy-subrc.
 
 ENDCLASS.
 
@@ -83,42 +104,47 @@ CLASS ZKH_AS_FILE_UPLOAD IMPLEMENTATION.
 
 
   METHOD save_file.
-    DATA: lt_file_content TYPE TABLE OF string,
-          lv_line         TYPE string.
-    CALL METHOD cl_gui_frontend_services=>gui_upload
-      EXPORTING
-        filename     = iv_file_path
-        read_by_line = 'X'
-        codepage     = '4110'
-      CHANGING
-        data_tab     = lt_file_content
-      EXCEPTIONS
-        OTHERS       = 1.
-    IF sy-subrc <> 0.
-      rv_result = abap_false.
-      me->log_msg( iv_msg = 'Error uploading file.' iv_msg_type = 'E' ).
-      RETURN.
-    ENDIF.
-
-    OPEN DATASET iv_target_path FOR OUTPUT IN TEXT MODE ENCODING UTF-8.
-    IF sy-subrc <> 0.
-      rv_result = abap_false.
-      me->log_msg( iv_msg = 'Error opening target file.' iv_msg_type = 'E' ).
-      RETURN.
-    ENDIF.
-
-    LOOP AT lt_file_content INTO lv_line.
-      TRANSFER lv_line TO iv_target_path.
-    ENDLOOP.
-    CLOSE DATASET iv_target_path.
-
-    IF sy-subrc = 0.
-      rv_result = abap_true.
-      me->log_msg( iv_msg = 'File saved successfully.' iv_msg_type = 'S' ).
-    ELSE.
-      rv_result = abap_false.
-      me->log_msg( iv_msg = 'Error saving file.' iv_msg_type = 'E' ).
-    ENDIF.
+    DATA: lt_file_content TYPE TABLE OF x255,
+          lv_line         TYPE x255.
+    TRY.
+        CALL METHOD cl_gui_frontend_services=>gui_upload
+          EXPORTING
+            filename     = iv_file_path
+            read_by_line = 'X'
+            codepage     = '4110'
+          CHANGING
+            data_tab     = lt_file_content
+          EXCEPTIONS
+            OTHERS       = 1.
+        IF sy-subrc <> 0.
+          rv_result = abap_false.
+          me->log_msg( iv_msg = 'Error uploading file.' iv_msg_type = 'E' ).
+          RETURN.
+        ENDIF.
+        OPEN DATASET iv_target_path FOR OUTPUT IN BINARY MODE.
+        IF sy-subrc <> 0.
+          rv_result = abap_false.
+          me->log_msg( iv_msg = 'Error opening target file.' iv_msg_type = 'E' ).
+          RETURN.
+        ENDIF.
+        LOOP AT lt_file_content INTO lv_line.
+          TRANSFER lv_line TO iv_target_path.
+        ENDLOOP.
+        CLOSE DATASET iv_target_path.
+        IF sy-subrc = 0.
+          rv_result = abap_true.
+          me->log_msg( iv_msg = 'File saved successfully.' iv_msg_type = 'S' ).
+        ELSE.
+          rv_result = abap_false.
+          me->log_msg( iv_msg = 'Error saving file.' iv_msg_type = 'E' ).
+        ENDIF.
+      CATCH cx_sy_conversion_codepage INTO DATA(lx_conv).
+        rv_result = abap_false.
+        me->log_msg( iv_msg = |Conversion codepage error: { lx_conv->get_text( ) }| iv_msg_type = 'E' ).
+      CATCH cx_sy_file_io INTO DATA(lx_file_io).
+        rv_result = abap_false.
+        me->log_msg( iv_msg = |File I/O error: { lx_file_io->get_text( ) }| iv_msg_type = 'E' ).
+    ENDTRY.
   ENDMETHOD.
 
 
@@ -154,9 +180,8 @@ CLASS ZKH_AS_FILE_UPLOAD IMPLEMENTATION.
   METHOD upload_file.
     DATA: lv_file_name TYPE string,
           lv_answer    TYPE c.
-    lv_file_name = get_file_name( iv_file_path = iv_source ).
-
-    IF check_file_exists( iv_file_path = iv_target && '/' && lv_file_name ) = abap_true.
+    lv_file_name = me->get_file_name( iv_file_path = iv_source ).
+    IF me->check_file_exists( iv_file_path = iv_target && '/' && lv_file_name ) = abap_true.
       CALL FUNCTION 'POPUP_TO_CONFIRM'
         EXPORTING
           titlebar       = 'File exists'
@@ -174,28 +199,45 @@ CLASS ZKH_AS_FILE_UPLOAD IMPLEMENTATION.
         RETURN.
       ENDIF.
     ENDIF.
-
-    IF NOT save_file( iv_file_path = iv_source iv_target_path = iv_target && '/' && lv_file_name ).
+    IF NOT me->save_file( iv_file_path = iv_source iv_target_path = iv_target && '/' && lv_file_name ).
       gv_subrc = 1.
     ELSE.
       gv_subrc = 0.
       me->log_msg( iv_msg = 'File uploaded successfully.' iv_msg_type = 'S' ).
     ENDIF.
-
     me->display_log( ).
+  ENDMETHOD.
+
+
+   METHOD set_logical_file_name.
+    IF iv_lname = 'ZKH_FOLDER_FLN'.
+      rv_target_path = '/tmp'.
+    ELSE.
+      CALL FUNCTION 'FILE_GET_NAME'
+        EXPORTING
+          logical_filename = iv_lname
+        IMPORTING
+          file_name        = rv_target_path
+        EXCEPTIONS
+          others           = 1.
+      IF sy-subrc <> 0.
+        me->log_msg( iv_msg = 'Logical name conversion error' iv_msg_type = 'E' ).
+        rv_target_path = ''.
+      ENDIF.
+    ENDIF.
   ENDMETHOD.
 
 
   METHOD zkh_file_upload_i~create_log.
     CALL FUNCTION 'BAL_LOG_CREATE'
       EXPORTING
-        i_s_log                 = VALUE bal_s_log( extnumber = 'File upload to AppServer'
-                                                   aldate    = sy-datum
-                                                   altime    = sy-uzeit
-                                                   altcode   = sy-tcode
-                                                   aluser    = sy-uname )
+        i_s_log = VALUE bal_s_log( extnumber = 'File upload to AppServer'
+                                   aldate    = sy-datum
+                                   altime    = sy-uzeit
+                                   altcode   = sy-tcode
+                                   aluser    = sy-uname )
       IMPORTING
-        e_log_handle            = mv_log_handle
+        e_log_handle = mv_log_handle
       EXCEPTIONS
         log_header_inconsistent = 1
         OTHERS                  = 2.
@@ -205,12 +247,10 @@ CLASS ZKH_AS_FILE_UPLOAD IMPLEMENTATION.
 
   METHOD zkh_file_upload_i~display_log.
     DATA: ls_profile TYPE bal_s_prof.
-
     CALL FUNCTION 'BAL_DSP_PROFILE_NO_TREE_GET'
       IMPORTING
         e_s_display_profile = ls_profile.
     ls_profile-use_grid = abap_true.
-
     CALL FUNCTION 'BAL_DSP_LOG_DISPLAY'
       EXPORTING
         i_s_display_profile  = ls_profile
@@ -248,7 +288,7 @@ CLASS ZKH_AS_FILE_UPLOAD IMPLEMENTATION.
         OTHERS           = 4.
     IF sy-subrc <> 0.
       MESSAGE ID sy-msgid TYPE sy-msgty NUMBER sy-msgno
-      WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
+                 WITH sy-msgv1 sy-msgv2 sy-msgv3 sy-msgv4.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

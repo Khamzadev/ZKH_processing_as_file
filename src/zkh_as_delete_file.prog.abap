@@ -7,9 +7,9 @@ REPORT ZKH_AS_DELETE_FILE.
 
 SELECTION-SCREEN BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
 
-PARAMETERS: p_path TYPE epsf-epsdirnam default '/tmp/',
-            p_days TYPE i,
-            p_test TYPE abap_bool AS CHECKBOX default 'x'.
+PARAMETERS: p_path TYPE epsf-epsdirnam OBLIGATORY default '/tmp/',
+            p_days TYPE  i OBLIGATORY,
+            p_test TYPE abap_bool  AS CHECKBOX default 'x'.
 
 SELECTION-SCREEN END OF BLOCK B1.
 
