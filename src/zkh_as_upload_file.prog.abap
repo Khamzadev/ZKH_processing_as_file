@@ -5,7 +5,7 @@ INCLUDE zkh_as_upload_file_inc.
 SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE TEXT-001.
 
   PARAMETERS: p_source TYPE localfile OBLIGATORY,
-              p_lname  TYPE string OBLIGATORY DEFAULT 'ZKH_FOLDER_FLN'.
+              p_lname  TYPE FILENAME-FILEINTERN OBLIGATORY DEFAULT 'ZDA_FILE_UPLOAD_LFN'.
 
 SELECTION-SCREEN END OF BLOCK b1.
 
@@ -26,7 +26,6 @@ START-OF-SELECTION.
       lv_target_path = lo_file_upload->set_logical_file_name( iv_lname = p_lname ).
     CATCH cx_root INTO DATA(lx_root).
       MESSAGE lx_root->get_text( ) TYPE 'E'.
-      RETURN.
   ENDTRY.
 
 
